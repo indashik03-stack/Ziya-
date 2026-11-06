@@ -1,0 +1,100 @@
+{
+  "entities": {
+    "VoiceLog": {
+      "title": "VoiceLog",
+      "description": "Log of Gemini AI voice interactions and command executions",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "User voice transcript or typed command",
+          "maxLength": 1000
+        },
+        "response": {
+          "type": "string",
+          "description": "AI response generated for the user",
+          "maxLength": 2000
+        },
+        "language": {
+          "type": "string",
+          "description": "Language used for interaction (en, hi, bn)",
+          "maxLength": 10
+        },
+        "action": {
+          "type": "string",
+          "description": "Control action executed, if any",
+          "maxLength": 50
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        }
+      },
+      "required": ["command", "response", "language", "createdAt"]
+    },
+    "SystemSetting": {
+      "title": "SystemSetting",
+      "description": "Persistent control centre settings state",
+      "type": "object",
+      "properties": {
+        "isWifiOn": {
+          "type": "boolean",
+          "description": "Wi-Fi status"
+        },
+        "isBluetoothOn": {
+          "type": "boolean",
+          "description": "Bluetooth status"
+        },
+        "isMobileDataOn": {
+          "type": "boolean",
+          "description": "Mobile data status"
+        },
+        "isFlashlightOn": {
+          "type": "boolean",
+          "description": "Torch flashlight status"
+        },
+        "brightness": {
+          "type": "number",
+          "description": "Screen brightness level (0 to 1)"
+        },
+        "volume": {
+          "type": "number",
+          "description": "Sound volume level (0 to 1)"
+        },
+        "activeLanguage": {
+          "type": "string",
+          "description": "Active UI and voice language (en, hi, bn)",
+          "maxLength": 10
+        },
+        "liquidGlassStyle": {
+          "type": "string",
+          "description": "HyperOS Liquid Glass visual style (clear or tinted)",
+          "enum": ["clear", "tinted"]
+        },
+        "backgroundScanActive": {
+          "type": "boolean",
+          "description": "Continuous ambient background scan audio state"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["isWifiOn", "isBluetoothOn", "isMobileDataOn", "brightness", "volume", "activeLanguage"]
+    }
+  },
+  "firestore": {
+    "/voice_logs/{logId}": {
+      "schema": {
+        "$ref": "#/entities/VoiceLog"
+      },
+      "description": "Collection of recorded AI voice interactions"
+    },
+    "/system_settings/{settingId}": {
+      "schema": {
+        "$ref": "#/entities/SystemSetting"
+      },
+      "description": "Singleton or user-scoped control centre settings state"
+    }
+  }
+}

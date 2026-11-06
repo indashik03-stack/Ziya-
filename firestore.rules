@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helper Primitives
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Validation Blueprint for VoiceLog
+    function isValidVoiceLog(data) {
+      return data.keys().hasAll(['command', 'response', 'language', 'createdAt'])
+        && data.keys().hasOnly(['command', 'response', 'language', 'action', 'createdAt'])
+        && data.command is string && data.command.size() <= 1000
+        && data.response is string && data.response.size() <= 2000
+        && data.language is string && data.language.size() <= 10
+        && (!('action' in data) || (data.action is string && data.action.size() <= 50))
+        && data.createdAt is string;
+    }
+
+    // Validation Blueprint for SystemSetting
+    function isValidSystemSetting(data) {
+      return data.keys().hasAll(['isWifiOn', 'isBluetoothOn', 'isMobileDataOn', 'brightness', 'volume', 'activeLanguage'])
+        && data.keys().hasOnly(['isWifiOn', 'isBluetoothOn', 'isMobileDataOn', 'isFlashlightOn', 'brightness', 'volume', 'activeLanguage', 'liquidGlassStyle', 'backgroundScanActive', 'updatedAt'])
+        && data.isWifiOn is bool
+        && data.isBluetoothOn is bool
+        && data.isMobileDataOn is bool
+        && (!('isFlashlightOn' in data) || data.isFlashlightOn is bool)
+        && (data.brightness is number || data.brightness is int || data.brightness is float)
+        && (data.volume is number || data.volume is int || data.volume is float)
+        && data.activeLanguage is string && data.activeLanguage.size() <= 10
+        && (!('liquidGlassStyle' in data) || (data.liquidGlassStyle in ['clear', 'tinted']))
+        && (!('backgroundScanActive' in data) || data.backgroundScanActive is bool)
+        && (!('updatedAt' in data) || data.updatedAt is string);
+    }
+
+    // Voice Logs Collection
+    match /voice_logs/{logId} {
+      allow get, list: if isValidId(logId);
+      allow create: if isValidId(logId) && isValidVoiceLog(incoming());
+      allow update, delete: if false; // Voice logs are append-only audit records
+    }
+
+    // System Settings Collection
+    match /system_settings/{settingId} {
+      allow get, list: if isValidId(settingId);
+      allow create: if isValidId(settingId) && isValidSystemSetting(incoming());
+      allow update: if isValidId(settingId) && isValidSystemSetting(incoming());
+      allow delete: if false;
+    }
+  }
+}

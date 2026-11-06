@@ -1,0 +1,12 @@
+{
+  "name": "JARVIS AI - HyperOS Control Centre",
+  "description": "Futuristic JARVIS AI Control Centre inspired by Xiaomi HyperOS Liquid Glass design with Quick Settings, Gemini Live Voice Assistant, Notifications, Communication & complete Android Kotlin source code.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
+
